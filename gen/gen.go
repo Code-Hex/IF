@@ -82,15 +82,28 @@ func GenCode() {
 	var buf bytes.Buffer
 	buf.WriteString("package IF\n\n")
 
+	buf.WriteString("const (\n")
+	for _, key := range types[1:17] {
+		t := typesMap[key]
+		fmt.Fprintf(&buf, "_%s = %s(0)\n", t, t)
+	}
+	buf.WriteString(")\n\n")
+
 	// Else function
 	for _, key := range types {
 		t := typesMap[key]
 		if key == Interface {
+			buf.WriteString("// Else returns second argument if condition is true\n")
+			buf.WriteString("// otherwise returns third argument.\n")
+			buf.WriteString("// This function's return value's type is interface{}.\n")
 			fmt.Fprintf(&buf,
 				"func Else(condition bool, a %s, b %s) %s {\n",
 				t, t, t,
 			)
 			buf.WriteString("if condition {\nreturn a\n}\nreturn b\n}\n\n")
+			buf.WriteString("// ElseSlice returns second argument if condition is true\n")
+			buf.WriteString("// otherwise returns third argument.\n")
+			buf.WriteString("// This function's return value's type is []interface{}\n")
 			fmt.Fprintf(&buf,
 				"func ElseSlice(condition bool, a []%s, b []%s) []%s {\n",
 				t, t, t,
@@ -98,6 +111,9 @@ func GenCode() {
 			buf.WriteString("if condition {\nreturn a\n}\nreturn b\n}\n\n")
 
 			// Nil function
+			buf.WriteString("// Nil returns second argument if object is nil\n")
+			buf.WriteString("// otherwise returns first argument.\n")
+			buf.WriteString("// This function's return value's type is interface{}.\n")
 			fmt.Fprintf(&buf,
 				"func Nil(object %s, a %s) %s {\n",
 				t, t, t,
@@ -105,6 +121,9 @@ func GenCode() {
 			buf.WriteString("if isNil(object) {\nreturn a}\nreturn object\n}\n\n")
 
 			// NotNil function
+			buf.WriteString("// NotNil returns second argument unless object is nil\n")
+			buf.WriteString("// otherwise returns first argument.\n")
+			buf.WriteString("// This function's return value's type is interface{}.\n")
 			fmt.Fprintf(&buf,
 				"func NotNil(object %s, a %s) %s {\n",
 				t, t, t,
@@ -112,10 +131,22 @@ func GenCode() {
 			buf.WriteString("if !isNil(object) {\nreturn a}\nreturn object\n}\n\n")
 		} else {
 			fmt.Fprintf(&buf,
+				"// Else%s returns second argument if condition is true\n",
+				key,
+			)
+			buf.WriteString("// otherwise returns third argument.\n")
+			fmt.Fprintf(&buf, "// This function's return value's type is %s.\n", t)
+			fmt.Fprintf(&buf,
 				"func Else%s(condition bool, a %s, b %s) %s {\n",
 				key, t, t, t,
 			)
 			buf.WriteString("if condition {\nreturn a\n}\nreturn b\n}\n\n")
+			fmt.Fprintf(&buf,
+				"// Else%sSlice returns second argument if condition is true\n",
+				key,
+			)
+			buf.WriteString("// otherwise returns third argument.\n")
+			fmt.Fprintf(&buf, "// This function's return value's type is []%s.\n", t)
 			fmt.Fprintf(&buf,
 				"func Else%sSlice(condition bool, a []%s, b []%s) []%s {\n",
 				key, t, t, t,
@@ -126,23 +157,23 @@ func GenCode() {
 			switch key {
 			case Uint8, Uint16, Uint32, Uint64, Int8, Int16, Int32, Int64,
 				Float32, Float64, Complex64, Complex128, Rune, Byte, Uint, Int:
+				fmt.Fprintf(&buf, "// %sIsZero returns second argument if first argument is 0\n", key)
+				buf.WriteString("// otherwise returns first argument.\n")
+				fmt.Fprintf(&buf, "// This function's return value's type is %s.\n", t)
 				fmt.Fprintf(&buf,
-					"func Zero%s(n %s, a %s) %s {\n",
+					"func %sIsZero(n %s, a %s) %s {\n",
 					key, t, t, t,
 				)
-				fmt.Fprintf(&buf, "if n == %s(0) {\nreturn a\n}\nreturn n\n}\n\n", t)
+				fmt.Fprintf(&buf, "if n == _%s {\nreturn a\n}\nreturn n\n}\n\n", t)
 			case String:
+				fmt.Fprintf(&buf, "// StringIsEmpty returns first argument if first argument is \"\"\n")
+				buf.WriteString("// otherwise returns second argument.\n")
+				fmt.Fprintf(&buf, "// This function's return value's type is %s.\n", t)
 				fmt.Fprintf(&buf,
-					"func Empty(str %s, a %s) %s {\n",
+					"func StringIsEmpty(str %s, a %s) %s {\n",
 					t, t, t,
 				)
-				buf.WriteString(`if str == "" {
-return str
-}
-return str
-}
-
-`)
+				buf.WriteString("if str == \"\" {\nreturn str\n}\nreturn str\n}\n\n")
 			}
 		}
 	}
