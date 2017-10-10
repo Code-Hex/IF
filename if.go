@@ -399,7 +399,7 @@ func Empty(str string, a string) string {
 	return str
 }
 
-// isNil code stolen from https://github.com/stretchr/testify/blob/master/assert/assertions.go
+// isNil is stolen from https://github.com/stretchr/testify/blob/master/assert/assertions.go
 func isNil(object interface{}) bool {
 	if object == nil {
 		return true

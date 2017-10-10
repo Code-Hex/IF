@@ -147,7 +147,7 @@ return str
 		}
 	}
 
-	buf.WriteString(`// isNil code stolen from https://github.com/stretchr/testify/blob/master/assert/assertions.go
+	buf.WriteString(`// isNil is stolen from https://github.com/stretchr/testify/blob/master/assert/assertions.go
 func isNil(object interface{}) bool {
 	if object == nil {
 		return true
